@@ -1,0 +1,96 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos</title>
+    <link rel="stylesheet" href="{% static 'estilos/styles.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #E9967A;">
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'pagina_principal' %}" style="font-size: 1.8em; font-weight: bold;">RUTA CULINARIA</a>
+                
+            <div class="user-menu ms-auto">
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'perfil_cliente' %}">Mis Pedidos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">Cerrar Sesión</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login_cliente' %}" class="btn btn-outline-primary me-2">Iniciar Sesión</a>
+                    <a href="{% url 'registro_cliente' %}" class="btn btn-primary">Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>        
+</header>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-5">Mis Pedidos</h2>
+    <div class="row">
+        {% if pedidos %}
+            {% for pedido in pedidos %}
+            <div class="col-md-6">
+                <div class="card mb-4 shadow-sm" style="border-radius: 15px;">
+                    <div class="row g-0 align-items-center">
+                        <div class="col-md-4">
+                            <img src="{{ pedido.plato.imagen.url }}" class="img-fluid rounded-start" alt="{{ pedido.plato.nombre }}">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ pedido.plato.nombre }}</h5>
+                                <p>Cantidad: {{ pedido.cantidad }}</p>
+                                <p>Fecha de Retiro: {{ pedido.fecha_retiro }}</p>
+                                <p>Hora de Retiro: {{ pedido.hora_retiro }}</p>
+                                <p>Precio Total: ${{ pedido.precio_total|intcomma }}</p>
+                                
+                                <p><strong>Estado:</strong> 
+                                    {% if pedido.estado == 'pendiente' %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                    {% elif pedido.estado == 'aceptado' %}
+                                        <span class="badge bg-success">Aceptado</span>
+                                        <p class="text-primary"><strong>Código de Autenticación:</strong> {{ pedido.codigo_autenticacion }}</p>
+                                    {% elif pedido.estado == 'rechazado' %}
+                                        <span class="badge bg-danger">Rechazado</span>
+                                        <p><strong>Motivo:</strong> {{ pedido.motivo_rechazo }}</p>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info text-center">
+                No tienes pedidos.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<footer class="footer bg-dark text-light text-center py-4 mt-5">
+    <div class="container">
+        <p>© 2024 Restaurante Ruta Culinaria</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

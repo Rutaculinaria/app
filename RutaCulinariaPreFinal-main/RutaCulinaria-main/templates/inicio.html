@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruta Culinaria</title>
+    <link rel="stylesheet" href="{% static 'estilos/styles.css/' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'pagina_principal' %}" style="font-size: 1.8em; font-weight: bold;">RUTA CULINARIA</a>
+            
+            <div class="user-menu ms-auto">
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'perfil_cliente' %}">Mis Pedidos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">Cerrar Sesión</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login_cliente' %}" class="btn btn-outline-primary me-2">Iniciar Sesión</a>
+                    <a href="{% url 'registro_cliente' %}" class="btn btn-primary">Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="header-image">
+        <img src="{% static 'imagenes/header.jpg' %}" alt="Header Image">
+    </div>
+    <div class="post-header-section text-center">
+        <h2>Menú</h2>
+    </div>
+    <div class="menu-section container mt-5">
+        <div class="row">
+            {% for item in menu_items %}
+            <div class="col-md-4 mb-4">
+                <div class="card menu-item-card text-center">
+                    <img src="{{ item.imagen.url }}" class="card-img-top" alt="Imagen del menú">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.nombre }}</h5>
+                        <p class="card-text">Precio: ${{ item.precio|floatformat:0 }}</p>
+                        <a href="{% url 'orden_actual' item.id %}" class="btn btn-outline-primary">Añadir a la orden</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Contacto</h5>
+                    <p><strong>Dirección:</strong> Calle Arauco 427, Valdivia, Chile</p>
+                    <p><strong>Teléfono:</strong> +56 9 8765 4321</p>
+                    <p><strong>Email:</strong> contacto@rutaculinaria.cl</p>
+                    <p><strong>Horario:</strong> Lunes a Sábado, 10:00 AM - 10:00 PM</p>
+                </div>
+                <div class="col-md-6 d-flex flex-column align-items-end justify-content-center">
+                    <h5>Acceso Administrativo</h5>
+                    <a href="{% url 'login_admin' %}" class="btn btn-outline-secondary">Iniciar Sesión Administrador</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

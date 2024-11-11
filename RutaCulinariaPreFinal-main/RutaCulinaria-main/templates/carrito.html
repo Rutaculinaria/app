@@ -1,0 +1,142 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+    <link href="{% static 'estilos/styles.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-page">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'pagina_principal' %}" style="font-size: 1.8em; font-weight: bold;">RUTA CULINARIA</a>
+                
+                <div class="user-menu ms-auto">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ user.username }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'perfil_cliente' %}">Mis Pedidos</a></li>
+                                <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
+                                <li>
+                                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Cerrar Sesión</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login_cliente' %}" class="btn btn-outline-primary me-2">Iniciar Sesión</a>
+                        <a href="{% url 'registro_cliente' %}" class="btn btn-primary">Registrarse</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>        
+    </header>
+
+    <div class="header-image">
+        <img src="{% static 'imagenes/header.jpg' %}" alt="Header Image">
+    </div>
+
+    <div class="container mt-5">
+        <h2 class="text-center">Tu Carrito de Compras</h2>
+        <div class="row">
+            <div class="col-md-8">
+                {% if pedidos %}
+                    {% for pedido in pedidos %}
+                    <div class="card mb-3">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-1 text-center">
+                                <input type="checkbox" class="select-item" data-precio="{{ pedido.precio_total }}" data-id="{{ pedido.id }}">
+                            </div>
+                            <div class="col-md-3">
+                                {% if pedido.plato.imagen %}
+                                    <img src="{{ pedido.plato.imagen.url }}" class="img-fluid rounded-start" alt="{{ pedido.plato.nombre }}">
+                                {% else %}
+                                    <img src="{% static 'no_image_available.jpg' %}" class="img-fluid" alt="No image available">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ pedido.plato.nombre }}</h5>
+                                    <p class="card-text">Cantidad: {{ pedido.cantidad }}</p>
+                                    <p class="card-text">Fecha de Retiro: {{ pedido.fecha_retiro }}</p>
+                                    <p class="card-text">Hora de Retiro: {{ pedido.hora_retiro }}</p>
+                                    <p class="card-text">Precio Total: ${{ pedido.precio_total|intcomma }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center d-flex justify-content-center align-items-center">
+                                <a href="{% url 'editar_pedido' pedido.plato.id pedido.id %}" class="btn btn-warning mb-2">✏️</a>
+                                <a href="{% url 'eliminar_pedido' pedido.id %}" class="btn btn-danger">❌</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No tienes productos en tu carrito.</p>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Total del Pedido</h4>
+                        <h5>Total: $<span id="total">{{ total|intcomma }}</span></h5>
+                        {% if pedidos and pedidos.0.id %}
+                            <a id="finalizar-btn" href="{% url 'finalizar_pedido' pedidos.0.id %}" class="btn btn-primary w-100">Finalizar Pedido</a>
+                        {% else %}
+                            <button class="btn btn-secondary w-100" disabled>No se puede finalizar</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const checkboxes = document.querySelectorAll('.select-item');
+        const totalElem = document.getElementById('total');
+        const finalizarBtn = document.getElementById('finalizar-btn');
+
+        function actualizarTotal() {
+            let total = 0;
+            let pedidoSeleccionado = null;
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    total += parseInt(checkbox.dataset.precio);
+                    pedidoSeleccionado = checkbox.dataset.id;
+                }
+            });
+
+            totalElem.textContent = total.toLocaleString();
+
+            if (pedidoSeleccionado) {
+                finalizarBtn.href = `/finalizar/${pedidoSeleccionado}/`;
+                finalizarBtn.classList.remove('btn-secondary');
+                finalizarBtn.classList.add('btn-primary');
+                finalizarBtn.style.pointerEvents = 'auto';
+            } else {
+                finalizarBtn.href = "#";
+                finalizarBtn.classList.remove('btn-primary');
+                finalizarBtn.classList.add('btn-secondary');
+                finalizarBtn.style.pointerEvents = 'none';
+            }
+        }
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', actualizarTotal);
+        });
+
+        actualizarTotal();
+    </script>
+
+    <footer class="footer text-center py-3 mt-5 bg-dark text-white">
+        <p>© 2024 Restaurante - Administración</p>
+    </footer>
+</body>
+</html>

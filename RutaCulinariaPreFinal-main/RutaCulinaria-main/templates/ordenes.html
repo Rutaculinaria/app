@@ -1,0 +1,130 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Órdenes</title>
+    <link rel="stylesheet" href="{% static 'estilos/styles.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #E9967A;">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'pagina_principal' %}">RUTA CULINARIA</a>
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-dark">Cerrar Sesión</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="header-image mb-4">
+    <img src="{% static 'imagenes/header.jpg' %}" alt="Header Image" class="img-fluid w-100">
+</div>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gestión de Órdenes</h2>
+        <a href="{% url 'menu_admin' %}" class="btn btn-success">Registrar Nuevo Plato</a>
+    </div>
+
+    <h2 class="text-center mb-5">Órdenes Pendientes</h2>
+
+    {% if pedidos_pendientes %}
+        {% for pedido in pedidos_pendientes %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>{{ pedido.plato.nombre }}</h5>
+                <p>Cliente: {{ pedido.cliente.username }}</p>
+                <p>Cantidad: {{ pedido.cantidad }}</p>
+                <p>Fecha de Retiro: {{ pedido.fecha_retiro }}</p>
+                <p>Hora de Retiro: {{ pedido.hora_retiro }}</p>
+                <p>Estado: <span class="text-warning">{{ pedido.estado }}</span></p>
+                <button class="btn btn-success" onclick="confirmarAceptar('{{ pedido.id }}')">Aceptar</button>
+                <button class="btn btn-danger" onclick="confirmarRechazar('{{ pedido.id }}')">Rechazar</button>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center">No hay pedidos pendientes.</div>
+    {% endif %}
+
+    <h2 class="text-center mt-5 mb-5">Órdenes Aceptadas</h2>
+
+    {% if pedidos_aceptados %}
+        {% for pedido in pedidos_aceptados %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>{{ pedido.plato.nombre }}</h5>
+                <p>Cliente: {{ pedido.cliente.username }}</p>
+                <p>Cantidad: {{ pedido.cantidad }}</p>
+                <p>Fecha de Retiro: {{ pedido.fecha_retiro }}</p>
+                <p>Hora de Retiro: {{ pedido.hora_retiro }}</p>
+                <p>Estado: <span class="text-success">{{ pedido.estado }}</span></p>
+                <p>Código de Autenticación: <strong>{{ pedido.codigo_autenticacion }}</strong></p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center">No hay pedidos aceptados.</div>
+    {% endif %}
+
+    <h2 class="text-center mt-5 mb-5">Órdenes Rechazadas</h2>
+
+    {% if pedidos_rechazados %}
+        {% for pedido in pedidos_rechazados %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>{{ pedido.plato.nombre }}</h5>
+                <p>Cliente: {{ pedido.cliente.username }}</p>
+                <p>Cantidad: {{ pedido.cantidad }}</p>
+                <p>Fecha de Retiro: {{ pedido.fecha_retiro }}</p>
+                <p>Hora de Retiro: {{ pedido.hora_retiro }}</p>
+                <p>Estado: <span class="text-danger">{{ pedido.estado }}</span></p>
+                <p>Motivo de Rechazo: <strong>{{ pedido.motivo_rechazo }}</strong></p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center">No hay pedidos rechazados.</div>
+    {% endif %}
+</div>
+
+
+
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar Plato</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar este plato?
+            </div>
+            <div class="modal-footer">
+                <form method="POST" id="formEliminar">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer bg-dark text-light text-center py-4 mt-5">
+    <div class="container">
+        <p>© 2024 Restaurante Ruta Culinaria - Administración</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

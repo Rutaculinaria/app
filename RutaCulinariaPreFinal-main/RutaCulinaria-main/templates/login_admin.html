@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicia Sesión - Administrador</title>
+    <link rel="stylesheet" href="{% static 'estilos/styles.css/' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'pagina_principal' %}" style="font-size: 1.8em; font-weight: bold;">RUTA CULINARIA</a>
+            
+            <div class="user-menu ms-auto">
+                <a href="{% url 'login_cliente' %}" class="btn btn-outline-primary me-3">Iniciar Sesión</a>
+                <a href="{% url 'registro_cliente' %}" class="btn btn-primary">Registrarse</a>
+            </div>
+        </div>
+    </nav>
+    
+
+    <div class="header-image">
+        <img src="{% static 'imagenes/header.jpg' %}" alt="Header Image">
+    </div>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <h2 class="text-center">Vista de Administración</h2>
+                        <form method="post" action="{% url 'login_admin' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Nombre de usuario:</label>
+                                <input type="text" class="form-control" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña:</label>
+                                <input type="password" class="form-control" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mt-4">Iniciar Sesión</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 Restaurante - Administración</p>
+        </div>
+    </footer>
+
+</body>
+</html>

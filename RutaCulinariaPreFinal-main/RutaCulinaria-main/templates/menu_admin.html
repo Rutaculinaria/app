@@ -1,0 +1,137 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Nuevo Plato</title>
+    <link rel="stylesheet" href="{% static 'estilos/styles.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #E9967A;">
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'pagina_principal' %}" style="font-size: 1.8em; font-weight: bold;">RUTA CULINARIA</a>
+                
+            <div class="user-menu ms-auto">
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'perfil_cliente' %}">Mis Pedidos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">Cerrar Sesión</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login_cliente' %}" class="btn btn-outline-primary me-2">Iniciar Sesión</a>
+                    <a href="{% url 'registro_cliente' %}" class="btn btn-primary">Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>        
+</header>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-5">Registrar Nuevo Plato</h2>
+
+    <form method="post" enctype="multipart/form-data" id="plato-form">
+        {% csrf_token %}
+        <input type="hidden" name="plato_id" id="plato-id" value="">
+        <div class="mb-3">
+            <label for="nombre">Nombre del Plato:</label>
+            <input type="text" name="nombre" class="form-control" id="nombre" required>
+        </div>
+        <div class="mb-3">
+            <label for="precio">Precio:</label>
+            <input type="number" name="precio" class="form-control" id="precio" required>
+        </div>
+        <div class="mb-3">
+            <label for="imagen">Imagen del Plato:</label>
+            <input type="file" name="imagen" class="form-control" id="imagen">
+        </div>
+        <button type="submit" class="btn btn-primary w-100" id="form-btn">Registrar Plato</button>
+    </form>
+
+    <h3 class="text-center mt-5 mb-4">Platos Registrados</h3>
+    <div class="row">
+        {% if platos %}
+            {% for plato in platos %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if plato.imagen %}
+                        <img src="{{ plato.imagen.url }}" class="card-img-top" alt="{{ plato.nombre }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'no_image_available.jpg' %}" class="card-img-top" alt="No Image Available" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ plato.nombre }}</h5>
+                        <p class="card-text">Precio: ${{ plato.precio|intcomma }}</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <button class="btn btn-warning" onclick="editarPlato('{{ plato.id }}')">✏️ Editar</button>
+                        <button class="btn btn-danger" onclick="confirmarEliminar('{{ plato.id }}')">❌ Eliminar</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info text-center">No hay platos registrados.</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar este plato?
+            </div>
+            <div class="modal-footer">
+                <form method="post" id="formEliminar">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function confirmarEliminar(platoId) {
+    const formEliminar = document.getElementById('formEliminar');
+    formEliminar.action = `/eliminar_plato/${platoId}/`;
+    const modalEliminar = new bootstrap.Modal(document.getElementById('modalEliminar'));
+    modalEliminar.show();
+}
+
+function editarPlato(platoId) {
+    fetch(`/editar_plato/${platoId}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('form-titulo').textContent = 'Editar Plato';
+            document.getElementById('form-btn').textContent = 'Actualizar Plato';
+            document.getElementById('plato-id').value = data.id;
+            document.getElementById('nombre').value = data.nombre;
+            document.getElementById('precio').value = data.precio;
+        });
+}
+</script>
+
+</body>
+</html>
